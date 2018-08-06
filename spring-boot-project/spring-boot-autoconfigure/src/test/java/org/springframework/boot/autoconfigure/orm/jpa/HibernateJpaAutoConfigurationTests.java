@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,21 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
 import com.zaxxer.hikari.HikariDataSource;
+import org.hibernate.boot.model.naming.ImplicitNamingStrategy;
+import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.engine.transaction.jta.platform.spi.JtaPlatform;
 import org.junit.Test;
 
@@ -45,9 +46,13 @@ import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.mapping.NonAnnotatedEntity;
 import org.springframework.boot.autoconfigure.orm.jpa.test.City;
 import org.springframework.boot.autoconfigure.transaction.jta.JtaAutoConfiguration;
+import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
 import org.springframework.boot.orm.jpa.hibernate.SpringJtaPlatform;
+import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -113,7 +118,7 @@ public class HibernateJpaAutoConfigurationTests
 	@Test
 	public void testFlywaySwitchOffDdlAuto() {
 		contextRunner()
-				.withPropertyValues("spring.datasource.initialize:false",
+				.withPropertyValues("spring.datasource.initialization-mode:never",
 						"spring.flyway.locations:classpath:db/city")
 				.withConfiguration(AutoConfigurations.of(FlywayAutoConfiguration.class))
 				.run((context) -> assertThat(context).hasNotFailed());
@@ -122,7 +127,7 @@ public class HibernateJpaAutoConfigurationTests
 	@Test
 	public void testFlywayPlusValidation() {
 		contextRunner()
-				.withPropertyValues("spring.datasource.initialize:false",
+				.withPropertyValues("spring.datasource.initialization-mode:never",
 						"spring.flyway.locations:classpath:db/city",
 						"spring.jpa.hibernate.ddl-auto:validate")
 				.withConfiguration(AutoConfigurations.of(FlywayAutoConfiguration.class))
@@ -131,10 +136,9 @@ public class HibernateJpaAutoConfigurationTests
 
 	@Test
 	public void testLiquibasePlusValidation() {
-		contextRunner()
-				.withPropertyValues("spring.datasource.initialize:false",
-						"spring.liquibase.changeLog:classpath:db/changelog/db.changelog-city.yaml",
-						"spring.jpa.hibernate.ddl-auto:validate")
+		contextRunner().withPropertyValues("spring.datasource.initialization-mode:never",
+				"spring.liquibase.changeLog:classpath:db/changelog/db.changelog-city.yaml",
+				"spring.jpa.hibernate.ddl-auto:validate")
 				.withConfiguration(
 						AutoConfigurations.of(LiquibaseAutoConfiguration.class))
 				.run((context) -> assertThat(context).hasNotFailed());
@@ -224,11 +228,10 @@ public class HibernateJpaAutoConfigurationTests
 
 	@Test
 	public void providerDisablesAutoCommitIsNotConfiguredIfPropertyIsSet() {
-		contextRunner()
-				.withPropertyValues(
-						"spring.datasource.type:" + HikariDataSource.class.getName(),
-						"spring.datasource.hikari.auto-commit:false",
-						"spring.jpa.properties.hibernate.connection.provider_disables_autocommit=false")
+		contextRunner().withPropertyValues(
+				"spring.datasource.type:" + HikariDataSource.class.getName(),
+				"spring.datasource.hikari.auto-commit:false",
+				"spring.jpa.properties.hibernate.connection.provider_disables_autocommit=false")
 				.run((context) -> {
 					Map<String, Object> jpaProperties = context
 							.getBean(LocalContainerEntityManagerFactoryBean.class)
@@ -240,7 +243,7 @@ public class HibernateJpaAutoConfigurationTests
 	}
 
 	@Test
-	public void providerDisablesAutoCommitIsNotConfiguredWihJta() {
+	public void providerDisablesAutoCommitIsNotConfiguredWithJta() {
 		contextRunner()
 				.withConfiguration(AutoConfigurations.of(JtaAutoConfiguration.class))
 				.withPropertyValues(
@@ -252,6 +255,102 @@ public class HibernateJpaAutoConfigurationTests
 							.getJpaPropertyMap();
 					assertThat(jpaProperties).doesNotContainKeys(
 							"hibernate.connection.provider_disables_autocommit");
+				});
+	}
+
+	@Test
+	public void customResourceMapping() {
+		contextRunner().withClassLoader(new HideDataScriptClassLoader())
+				.withPropertyValues(
+						"spring.datasource.data:classpath:/db/non-annotated-data.sql",
+						"spring.jpa.mapping-resources=META-INF/mappings/non-annotated.xml")
+				.run((context) -> {
+					EntityManager em = context.getBean(EntityManagerFactory.class)
+							.createEntityManager();
+					NonAnnotatedEntity found = em.find(NonAnnotatedEntity.class, 2000L);
+					assertThat(found).isNotNull();
+					assertThat(found.getValue()).isEqualTo("Test");
+				});
+	}
+
+	@Test
+	public void physicalNamingStrategyCanBeUsed() {
+		contextRunner()
+				.withUserConfiguration(TestPhysicalNamingStrategyConfiguration.class)
+				.run((context) -> {
+					Map<String, Object> hibernateProperties = context
+							.getBean(HibernateJpaConfiguration.class)
+							.getVendorProperties();
+					assertThat(hibernateProperties)
+							.contains(entry("hibernate.physical_naming_strategy",
+									context.getBean("testPhysicalNamingStrategy")));
+					assertThat(hibernateProperties)
+							.doesNotContainKeys("hibernate.ejb.naming_strategy");
+				});
+	}
+
+	@Test
+	public void implicitNamingStrategyCanBeUsed() {
+		contextRunner()
+				.withUserConfiguration(TestImplicitNamingStrategyConfiguration.class)
+				.run((context) -> {
+					Map<String, Object> hibernateProperties = context
+							.getBean(HibernateJpaConfiguration.class)
+							.getVendorProperties();
+					assertThat(hibernateProperties)
+							.contains(entry("hibernate.implicit_naming_strategy",
+									context.getBean("testImplicitNamingStrategy")));
+					assertThat(hibernateProperties)
+							.doesNotContainKeys("hibernate.ejb.naming_strategy");
+				});
+	}
+
+	@Test
+	public void namingStrategyInstancesTakePrecedenceOverNamingStrategyProperties() {
+		contextRunner()
+				.withUserConfiguration(TestPhysicalNamingStrategyConfiguration.class,
+						TestImplicitNamingStrategyConfiguration.class)
+				.withPropertyValues(
+						"spring.jpa.hibernate.naming.physical-strategy:com.example.Physical",
+						"spring.jpa.hibernate.naming.implicit-strategy:com.example.Implicit")
+				.run((context) -> {
+					Map<String, Object> hibernateProperties = context
+							.getBean(HibernateJpaConfiguration.class)
+							.getVendorProperties();
+					assertThat(hibernateProperties).contains(
+							entry("hibernate.physical_naming_strategy",
+									context.getBean("testPhysicalNamingStrategy")),
+							entry("hibernate.implicit_naming_strategy",
+									context.getBean("testImplicitNamingStrategy")));
+					assertThat(hibernateProperties)
+							.doesNotContainKeys("hibernate.ejb.naming_strategy");
+				});
+	}
+
+	@Test
+	public void hibernatePropertiesCustomizerTakesPrecedenceOverStrategyInstancesAndNamingStrategyProperties() {
+		contextRunner()
+				.withUserConfiguration(
+						TestHibernatePropertiesCustomizerConfiguration.class,
+						TestPhysicalNamingStrategyConfiguration.class,
+						TestImplicitNamingStrategyConfiguration.class)
+				.withPropertyValues(
+						"spring.jpa.hibernate.naming.physical-strategy:com.example.Physical",
+						"spring.jpa.hibernate.naming.implicit-strategy:com.example.Implicit")
+				.run((context) -> {
+					Map<String, Object> hibernateProperties = context
+							.getBean(HibernateJpaConfiguration.class)
+							.getVendorProperties();
+					TestHibernatePropertiesCustomizerConfiguration configuration = context
+							.getBean(
+									TestHibernatePropertiesCustomizerConfiguration.class);
+					assertThat(hibernateProperties).contains(
+							entry("hibernate.physical_naming_strategy",
+									configuration.physicalNamingStrategy),
+							entry("hibernate.implicit_naming_strategy",
+									configuration.implicitNamingStrategy));
+					assertThat(hibernateProperties)
+							.doesNotContainKeys("hibernate.ejb.naming_strategy");
 				});
 	}
 
@@ -271,6 +370,45 @@ public class HibernateJpaAutoConfigurationTests
 			assertThat(city).isNotNull();
 			assertThat(city.getName()).isEqualTo("Washington");
 			this.called = true;
+		}
+
+	}
+
+	@Configuration
+	static class TestImplicitNamingStrategyConfiguration {
+
+		@Bean
+		public ImplicitNamingStrategy testImplicitNamingStrategy() {
+			return new SpringImplicitNamingStrategy();
+		}
+
+	}
+
+	@Configuration
+	static class TestPhysicalNamingStrategyConfiguration {
+
+		@Bean
+		public PhysicalNamingStrategy testPhysicalNamingStrategy() {
+			return new SpringPhysicalNamingStrategy();
+		}
+
+	}
+
+	@Configuration
+	static class TestHibernatePropertiesCustomizerConfiguration {
+
+		private final PhysicalNamingStrategy physicalNamingStrategy = new SpringPhysicalNamingStrategy();
+
+		private final ImplicitNamingStrategy implicitNamingStrategy = new SpringImplicitNamingStrategy();
+
+		@Bean
+		public HibernatePropertiesCustomizer testHibernatePropertiesCustomizer() {
+			return (hibernateProperties) -> {
+				hibernateProperties.put("hibernate.physical_naming_strategy",
+						this.physicalNamingStrategy);
+				hibernateProperties.put("hibernate.implicit_naming_strategy",
+						this.implicitNamingStrategy);
+			};
 		}
 
 	}
@@ -303,7 +441,7 @@ public class HibernateJpaAutoConfigurationTests
 		}
 
 		@Override
-		public int getCurrentStatus() throws SystemException {
+		public int getCurrentStatus() {
 			throw new UnsupportedOperationException();
 		}
 
@@ -321,7 +459,7 @@ public class HibernateJpaAutoConfigurationTests
 		@Override
 		public Enumeration<URL> getResources(String name) throws IOException {
 			if (HIDDEN_RESOURCES.contains(name)) {
-				return new Vector<URL>().elements();
+				return Collections.emptyEnumeration();
 			}
 			return super.getResources(name);
 		}

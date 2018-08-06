@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ObjectUtils;
@@ -56,6 +58,8 @@ class WebMvcTypeExcludeFilter extends AnnotationCustomizableTypeExcludeFilter {
 		includes.add(HandlerMethodArgumentResolver.class);
 		includes.add(HttpMessageConverter.class);
 		includes.add(ErrorAttributes.class);
+		includes.add(Converter.class);
+		includes.add(GenericConverter.class);
 		DEFAULT_INCLUDES = Collections.unmodifiableSet(includes);
 	}
 

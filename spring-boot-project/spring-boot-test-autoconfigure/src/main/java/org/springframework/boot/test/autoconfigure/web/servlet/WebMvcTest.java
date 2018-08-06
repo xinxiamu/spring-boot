@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.OverrideAutoConfiguration;
@@ -34,6 +36,7 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.BootstrapWith;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
@@ -43,9 +46,10 @@ import org.springframework.test.web.servlet.MockMvc;
  * <p>
  * Using this annotation will disable full auto-configuration and instead apply only
  * configuration relevant to MVC tests (i.e. {@code @Controller},
- * {@code @ControllerAdvice}, {@code @JsonComponent} {@code Filter},
- * {@code WebMvcConfigurer} and {@code HandlerMethodArgumentResolver} beans but not
- * {@code @Component}, {@code @Service} or {@code @Repository} beans).
+ * {@code @ControllerAdvice}, {@code @JsonComponent},
+ * {@code Converter}/{@code GenericConverter}, {@code Filter}, {@code WebMvcConfigurer}
+ * and {@code HandlerMethodArgumentResolver} beans but not {@code @Component},
+ * {@code @Service} or {@code @Repository} beans).
  * <p>
  * By default, tests annotated with {@code @WebMvcTest} will also auto-configure Spring
  * Security and {@link MockMvc} (include support for HtmlUnit WebClient and Selenium
@@ -71,6 +75,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @Documented
 @Inherited
 @BootstrapWith(WebMvcTestContextBootstrapper.class)
+@ExtendWith(SpringExtension.class)
 @OverrideAutoConfiguration(enabled = false)
 @TypeExcludeFilters(WebMvcTypeExcludeFilter.class)
 @AutoConfigureCache
@@ -129,7 +134,7 @@ public @interface WebMvcTest {
 	 * on the classpath. Defaults to {@code true}.
 	 * @return if Spring Security's MockMvc support is auto-configured
 	 */
-	@AliasFor(annotation = AutoConfigureMockMvc.class, attribute = "secure")
+	@AliasFor(annotation = AutoConfigureMockMvc.class)
 	boolean secure() default true;
 
 	/**

@@ -132,11 +132,6 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>com.googlecode.json-simple</groupId>
-			<artifactId>json-simple</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
 			<groupId>com.hazelcast</groupId>
 			<artifactId>hazelcast</artifactId>
 			<optional>true</optional>
@@ -238,7 +233,17 @@
 		</dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-new-relic</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-signalfx</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -247,7 +252,12 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>io.projectreactor.ipc</groupId>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-registry-wavefront</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor.netty</groupId>
 			<artifactId>reactor-netty</artifactId>
 			<optional>true</optional>
 		</dependency>
@@ -306,6 +316,11 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -468,6 +483,21 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-alpn-conscrypt-server</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.http2</groupId>
+			<artifactId>http2-server</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.elasticsearch.client</groupId>
+			<artifactId>elasticsearch-rest-high-level-client</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
 			<optional>true</optional>
@@ -560,6 +590,11 @@
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.messaginghub</groupId>
+			<artifactId>pooled-jms</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -664,7 +699,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-core</artifactId>
+			<artifactId>spring-cloud-connectors-core</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -699,7 +734,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-jwt-jose</artifactId>
+			<artifactId>spring-security-oauth2-jose</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -710,11 +745,6 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-webflux</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -740,21 +770,6 @@
 		<dependency>
 			<groupId>org.springframework.session</groupId>
 			<artifactId>spring-session-data-redis</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.social</groupId>
-			<artifactId>spring-social-facebook</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.social</groupId>
-			<artifactId>spring-social-linkedin</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.social</groupId>
-			<artifactId>spring-social-twitter</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -818,13 +833,13 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.mobile</groupId>
-			<artifactId>spring-mobile-device</artifactId>
+			<groupId>org.springframework.restdocs</groupId>
+			<artifactId>spring-restdocs-mockmvc</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.restdocs</groupId>
-			<artifactId>spring-restdocs-mockmvc</artifactId>
+			<artifactId>spring-restdocs-webtestclient</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -835,11 +850,6 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.social</groupId>
-			<artifactId>spring-social-config</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -883,6 +893,11 @@
 			<artifactId>spring-boot-test-support</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -922,16 +937,17 @@
 									<dependencySourceIncludes>
 										<dependencySourceInclude>${project.groupId}:*</dependencySourceInclude>
 									</dependencySourceIncludes>
+									<sourceFileExcludes>org/springframework/boot/docs/**/*.java</sourceFileExcludes>
 									<attach>false</attach>
 									<quiet>true</quiet>
 									<stylesheetfile>${basedir}/src/main/javadoc/spring-javadoc.css</stylesheetfile>
 									<links>
-										<link>http://docs.oracle.com/javase/8/docs/api/</link>
-										<link>http://docs.oracle.com/javaee/7/api/</link>
-										<link>http://docs.spring.io/spring-framework/docs/${spring.version}/javadoc-api/</link>
-										<link>http://docs.spring.io/spring-security/site/docs/${spring-security.version}/api/</link>
-										<link>http://tomcat.apache.org/tomcat-8.5-doc/api/</link>
-										<link>http://download.eclipse.org/jetty/stable-9/apidocs/</link>
+										<link>https://docs.oracle.com/javase/8/docs/api/</link>
+										<link>https://docs.oracle.com/javaee/7/api/</link>
+										<link>https://docs.spring.io/spring-framework/docs/${spring.version}/javadoc-api/</link>
+										<link>https://docs.spring.io/spring-security/site/docs/${spring-security.version}/api/</link>
+										<link>https://tomcat.apache.org/tomcat-8.5-doc/api/</link>
+										<link>https://www.eclipse.org/jetty/javadoc/${jetty.version}/</link>
 										<link>http://www.thymeleaf.org/apidocs/thymeleaf/${thymeleaf.version}/</link>
 									</links>
 								</configuration>
@@ -988,6 +1004,15 @@
 											<classifier>docs</classifier>
 											<type>zip</type>
 											<outputDirectory>${project.build.directory}/contents/gradle-plugin</outputDirectory>
+											<excludes>META-INF/**</excludes>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.springframework.boot</groupId>
+											<artifactId>spring-boot-actuator-autoconfigure</artifactId>
+											<version>${revision}</version>
+											<classifier>docs</classifier>
+											<type>zip</type>
+											<outputDirectory>${project.build.directory}/contents/actuator-api</outputDirectory>
 											<excludes>META-INF/**</excludes>
 										</artifactItem>
 									</artifactItems>
@@ -1133,7 +1158,12 @@
 						<dependencies>
 							<dependency>
 								<groupId>org.codehaus.groovy</groupId>
-								<artifactId>groovy-all</artifactId>
+								<artifactId>groovy</artifactId>
+								<version>${groovy.version}</version>
+							</dependency>
+							<dependency>
+								<groupId>org.codehaus.groovy</groupId>
+								<artifactId>groovy-ant</artifactId>
 								<version>${groovy.version}</version>
 							</dependency>
 							<dependency>
@@ -1159,6 +1189,7 @@
 									<doctype>book</doctype>
 									<attributes>
 										<docinfo>true</docinfo>
+										<jooq-version>${jooq.version}</jooq-version>
 										<spring-version>${spring.version}</spring-version>
 										<spring-boot-version>${revision}</spring-boot-version>
 										<spring-boot-docs-version>${revision}</spring-boot-docs-version>
@@ -1282,8 +1313,15 @@
 								</goals>
 								<phase>prepare-package</phase>
 								<configuration>
-									<epubCustomization>${basedir}/src/main/docbook/xsl/epub.xsl</epubCustomization>
+									<epub3Customization>${basedir}/src/main/docbook/xsl/epub.xsl</epub3Customization>
 									<targetDirectory>${basedir}/target/docbook/epub</targetDirectory>
+									<preProcess>
+										<copy todir="${basedir}/target/docbook/epub/images">
+											<fileset dir="${basedir}/src/main/docbook/images">
+												<include name="*.png" />
+											</fileset>
+										</copy>
+									</preProcess>
 									<postProcess>
 										<copy todir="${basedir}/target/contents/reference/epub">
 											<fileset dir="${basedir}/target/docbook">

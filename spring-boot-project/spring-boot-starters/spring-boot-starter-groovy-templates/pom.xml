@@ -39,11 +39,6 @@
 						<goals>
 							<goal>check</goal>
 						</goals>
-						<configuration>
-							<ignoredClassPatterns>
-								<ignoredClassPattern>javax.annotation.*</ignoredClassPattern>
-							</ignoredClassPatterns>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>

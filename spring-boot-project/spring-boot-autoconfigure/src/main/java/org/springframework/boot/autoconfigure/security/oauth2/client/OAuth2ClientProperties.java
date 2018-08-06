@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,9 +64,6 @@ public class OAuth2ClientProperties {
 		if (!StringUtils.hasText(registration.getClientSecret())) {
 			throw new IllegalStateException("Client secret must not be empty.");
 		}
-		if (!StringUtils.hasText(registration.getProvider())) {
-			throw new IllegalStateException("Provider must not be empty.");
-		}
 	}
 
 	/**
@@ -92,28 +89,28 @@ public class OAuth2ClientProperties {
 		private String clientSecret;
 
 		/**
-		 * Client authentication method. May be left blank then using a pre-defined
+		 * Client authentication method. May be left blank when using a pre-defined
 		 * provider.
 		 */
 		private String clientAuthenticationMethod;
 
 		/**
-		 * Authorization grant type. May be left blank then using a pre-defined provider.
+		 * Authorization grant type. May be left blank when using a pre-defined provider.
 		 */
 		private String authorizationGrantType;
 
 		/**
-		 * Redirect URI. May be left blank then using a pre-defined provider.
+		 * Redirect URI. May be left blank when using a pre-defined provider.
 		 */
-		private String redirectUri;
+		private String redirectUriTemplate;
 
 		/**
-		 * Authorization scopes. May be left blank then using a pre-defined provider.
+		 * Authorization scopes. May be left blank when using a pre-defined provider.
 		 */
 		private Set<String> scope;
 
 		/**
-		 * Client name. May be left blank then using a pre-defined provider.
+		 * Client name. May be left blank when using a pre-defined provider.
 		 */
 		private String clientName;
 
@@ -157,12 +154,12 @@ public class OAuth2ClientProperties {
 			this.authorizationGrantType = authorizationGrantType;
 		}
 
-		public String getRedirectUri() {
-			return this.redirectUri;
+		public String getRedirectUriTemplate() {
+			return this.redirectUriTemplate;
 		}
 
-		public void setRedirectUri(String redirectUri) {
-			this.redirectUri = redirectUri;
+		public void setRedirectUriTemplate(String redirectUriTemplate) {
+			this.redirectUriTemplate = redirectUriTemplate;
 		}
 
 		public Set<String> getScope() {
@@ -211,6 +208,11 @@ public class OAuth2ClientProperties {
 		 */
 		private String jwkSetUri;
 
+		/**
+		 * URI that an OpenID Connect Provider asserts as its Issuer Identifier.
+		 */
+		private String issuerUri;
+
 		public String getAuthorizationUri() {
 			return this.authorizationUri;
 		}
@@ -249,6 +251,14 @@ public class OAuth2ClientProperties {
 
 		public void setJwkSetUri(String jwkSetUri) {
 			this.jwkSetUri = jwkSetUri;
+		}
+
+		public String getIssuerUri() {
+			return this.issuerUri;
+		}
+
+		public void setIssuerUri(String issuerUri) {
+			this.issuerUri = issuerUri;
 		}
 
 	}

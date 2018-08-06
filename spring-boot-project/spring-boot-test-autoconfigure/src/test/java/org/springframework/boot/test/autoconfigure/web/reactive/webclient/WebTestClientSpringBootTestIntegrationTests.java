@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -35,7 +39,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Stephane Nicoll
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = "spring.main.web-application-type=reactive")
+@SpringBootTest(properties = "spring.main.web-application-type=reactive", classes = {
+		WebTestClientSpringBootTestIntegrationTests.TestConfiguration.class,
+		ExampleWebFluxApplication.class })
 @AutoConfigureWebTestClient
 public class WebTestClientSpringBootTestIntegrationTests {
 
@@ -58,9 +64,19 @@ public class WebTestClientSpringBootTestIntegrationTests {
 	}
 
 	@Test
-	public void shouldHaveRealService() throws Exception {
+	public void shouldHaveRealService() {
 		assertThat(this.applicationContext.getBeansOfType(ExampleRealService.class))
 				.hasSize(1);
+	}
+
+	@Configuration
+	static class TestConfiguration {
+
+		@Bean
+		public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+			return http.authorizeExchange().anyExchange().permitAll().and().build();
+		}
+
 	}
 
 }
